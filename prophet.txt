@@ -1,0 +1,127 @@
+Day 1 of learning:
+------------------
+
+Offical documentation:
+----------------------
+https://facebook.github.io/prophet/docs/quick_start.html
+
+Prophet:
+--------
+Introduction:
+-------------
+1.	A procedure for forecasting time series data based on an additive model where non-linear trends are fit with yearly, weekly, and plus holiday effects. 
+2.	It works best with time series that have strong seasonal effects and several seasons of historical data. 
+3.	Prophet is robust to missing data and shifts in the trend, and typically handles outliers well.
+======================================================================================================================================================================
+Sample Example:
+---------------
+
+The input to Prophet is always a dataframe with two columns: (ds and y)
+-----------------------------------------------------------------------
+	1.	The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. 
+	2.	The y column must be numeric, and represents the measurement we wish to forecast.
+
+Example:
+--------
+	1.	let’s look at a time series of the log daily page views for the Wikipedia page for Peyton Manning. 
+	2.	We scraped this data using the Wikipediatrend package in R. 
+	3.	Python Manning provides a nice example because it Prophet’s features, like multiple seasonality, changing growth rates, and model special days. 
+	4.	The CSV is available here.
+	
+syntax 1:
+---------	
+	# Python
+	import pandas as pd
+	from fbprophet import Prophet
+	
+syntax 2:
+---------	
+	# Python
+	df = pd.read_csv('../examples/example_wp_log_peyton_manning.csv')
+	df.head()
+	
+		    DS		   Y
+0	2007-12-10	9.590761
+1	2007-12-11	8.519590
+2	2007-12-12	8.183677
+3	2007-12-13	8.072467
+4	2007-12-14	7.893572
+
+		
+	1.	We fit the model by instantiating a new Prophet object.
+	2.	Any settings to the forecasting procedure are passed into the constructor. 
+	3.	Then you call its fit method and pass in the historical dataframe. 
+	4.	Fitting should take 1-5 seconds.
+	
+syntax 3:
+---------	
+	# Python
+	m = Prophet()
+	m.fit(df)	
+	
+	1.	A dataframe with a column ds containing the dates for which a prediction is to be made
+	2.	A suitable dataframe that extends into the future a specified number of days using the helper method Prophet.make_future_dataframe.
+	3.	By default it will also include the dates from the history, so we will see the model fit as well.
+	
+syntax 4:
+---------
+	# Python
+	future = m.make_future_dataframe(periods=365)
+	future.tail()
+	
+				DS
+3265	2017-01-15
+3266	2017-01-16
+3267	2017-01-17
+3268	2017-01-18
+3269	2017-01-19
+
+	1.	The predict method will assign each row in future a predicted value which it names yhat. 
+	2.	If you pass in historical dates, it will provide an in-sample fit. 
+	3.	The forecast object here is a new dataframe that includes a column yhat with the forecast, as well as columns for components and uncertainty intervals.
+
+syntax 5:
+---------	
+	# Python
+	forecast = m.predict(future)
+	forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
+		
+		DS				YHAT	YHAT_LOWER	YHAT_UPPER
+3265	2017-01-15	8.204125	7.449654	8.946255
+3266	2017-01-16	8.529148	7.792752	9.284594
+3267	2017-01-17	8.316555	7.563541	9.029357
+3268	2017-01-18	8.149153	7.384345	8.840279
+3269	2017-01-19	8.161075	7.430352	8.859482
+
+	You can plot the forecast by calling the Prophet.plot method and passing in your forecast dataframe.
+
+syntax 6:
+---------
+	# Python
+	fig1 = m.plot(forecast)
+
+	1.	If you want to see the forecast components, you can use the Prophet.plot_components method. 
+	2.	By default you’ll see the trend, yearly seasonality, and weekly seasonality of the time series. If you include holidays, you’ll see those here, too.
+
+syntax 7:
+---------
+	# Python
+	fig2 = m.plot_components(forecast)
+
+	1.	An interactive figure of the forecast and components can be created with plotly. 
+	2.	You will need to install plotly 4.0 or above separately, as it will not by default be installed with fbprophet. 
+	3.	You will also need to install the notebook and ipywidgets packages.
+
+syntax 8:
+---------
+	# Python
+	from fbprophet.plot import plot_plotly, plot_components_plotly
+
+	plot_plotly(m, forecast)
+
+syntax 9:
+---------
+	# Python
+	plot_components_plotly(m, forecast)
+
+	
